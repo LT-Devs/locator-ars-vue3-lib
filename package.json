@@ -3,7 +3,7 @@
   "version": "1.0.0",
   "description": "Permissions library for Vue 3 applications",
   "main": "dist/index.js",
-  "types": "dist/index.d.ts",
+  "types": "types/index.d.ts",
   "scripts": {
     "build": "vue-tsc && vite build",
     "test": "vitest run",
