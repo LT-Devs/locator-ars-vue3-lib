@@ -1,9 +1,22 @@
 {
   "name": "locator-ars-lib",
-  "version": "1.0.3",
+  "version": "1.0.5",
   "description": "Permissions library for Vue 3 applications",
-  "main": "dist/index.js",
+  "type": "module",
+  "main": "./dist/locator-ars-lib.umd.js",
+  "module": "./dist/locator-ars-lib.es.js",
+  "exports": {
+    ".": {
+      "types": "./types/index.d.ts",
+      "import": "./dist/locator-ars-lib.es.js",
+      "require": "./dist/locator-ars-lib.umd.js"
+    }
+  },
   "types": "types/index.d.ts",
+  "files": [
+    "dist",
+    "types"
+  ],
   "scripts": {
     "build": "vue-tsc && vite build",
     "test": "vitest run",
