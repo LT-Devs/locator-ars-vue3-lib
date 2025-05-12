@@ -36,6 +36,8 @@ declare module 'locator-ars-lib' {
         options?: PermissionsOptions
     ): PermissionsService
 
+    export function usePermissionsService(): PermissionsService
+
     const plugin: {
         install(app: App, options?: PermissionsOptions): void
     }

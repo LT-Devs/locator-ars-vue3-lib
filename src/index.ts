@@ -1,7 +1,7 @@
 import { App } from 'vue'
 import Check from './components/Check.vue'
 import { usePermissions } from './composables/usePermissions'
-import { PermissionsPlugin, setupPermissions } from './plugin'
+import { PermissionsPlugin, setupPermissions, usePermissionsService } from './plugin'
 import { vCan } from './directives/vCan'
 
 // Именованные экспорты
@@ -9,7 +9,8 @@ export {
     Check,
     usePermissions,
     setupPermissions,
-    vCan
+    vCan,
+    usePermissionsService
 }
 
 // Создаем основной объект плагина
