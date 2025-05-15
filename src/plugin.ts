@@ -4,6 +4,14 @@ import { setPermissionsService } from './directives/vCan'
 
 export const PermissionsKey: InjectionKey<PermissionsService> = Symbol('Permissions')
 
+/**
+ * Setup permissions service with provided options
+ * @param options Configuration options
+ * @param options.baseUrl Base URL for API requests
+ * @param options.endpoint Custom endpoint for permission checks
+ * @param options.application Application identifier to be sent as a header
+ * @returns Configured PermissionsService instance
+ */
 export function setupPermissions(options?: PermissionsOptions): PermissionsService {
     const service = new PermissionsService(options);
     // Устанавливаем глобальный сервис для директивы

@@ -30,6 +30,7 @@ const app = createApp(App);
 app.use(LocatorArsLib, {
   baseUrl: "https://your-api.com", // Базовый URL для API (опционально)
   endpoint: "/api/v1/dashboard/access", // Путь для проверки прав (опционально)
+  application: "my-app-name", // Идентификатор приложения для заголовка Application (опционально)
 });
 
 app.mount("#app");
