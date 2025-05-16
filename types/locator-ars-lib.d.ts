@@ -4,6 +4,7 @@ declare module 'locator-ars-lib' {
     export interface PermissionsOptions {
         baseUrl?: string
         endpoint?: string
+        application?: string
     }
 
     export interface UsePermissionsOptions {

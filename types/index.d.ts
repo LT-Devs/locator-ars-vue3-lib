@@ -3,6 +3,7 @@ import { App, Component, Ref, ComputedRef, ObjectDirective } from 'vue'
 export interface PermissionsOptions {
     baseUrl?: string
     endpoint?: string
+    application?: string
 }
 
 export interface UsePermissionsOptions {
