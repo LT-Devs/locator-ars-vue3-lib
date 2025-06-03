@@ -12,7 +12,7 @@ export default defineComponent({
   name: 'Check',
   props: {
     action: {
-      type: String as PropType<string>,
+      type: [String, Array] as PropType<string | string[]>,
       required: true
     },
     fallback: {
@@ -24,7 +24,7 @@ export default defineComponent({
     const { action } = toRefs(props);
     const isInitialLoading = ref(true);
     const { can, isLoading, check } = usePermissions(action, { autoCheck: false });
-    
+
     onMounted(async () => {
       await check();
       isInitialLoading.value = false;
@@ -37,4 +37,4 @@ export default defineComponent({
     };
   }
 });
-</script> 
+</script>

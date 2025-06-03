@@ -29,7 +29,7 @@ declare module 'locator-ars-lib' {
     export const vCan: ObjectDirective
 
     export function usePermissions(
-        action: string | Ref<string>,
+        action: string | string[] | Ref<string | string[]>,
         options?: UsePermissionsOptions
     ): UsePermissionsResult
 

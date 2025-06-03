@@ -5,14 +5,16 @@ export interface UsePermissionsOptions {
     autoCheck?: boolean
 }
 
-export function usePermissions(action: string | Ref<string>, options: UsePermissionsOptions = {}) {
+type ActionType = string | string[] | Ref<string | string[]>
+
+export function usePermissions(action: ActionType, options: UsePermissionsOptions = {}) {
     const permissionsService = usePermissionsService()
     const isAllowed = ref<boolean | null>(null)
     const isLoading = ref(false)
     const error = ref<Error | null>(null)
 
     const actionValue = computed(() => {
-        return typeof action === 'string' ? action : action.value
+        return typeof action === 'object' && 'value' in action ? action.value : action
     })
 
     const checkPermission = async () => {
@@ -22,7 +24,19 @@ export function usePermissions(action: string | Ref<string>, options: UsePermiss
         error.value = null
 
         try {
-            isAllowed.value = await permissionsService.can(actionValue.value)
+            if (Array.isArray(actionValue.value)) {
+                // Для массива проверяем все разрешения и возвращаем true, если хотя бы одно доступно
+                if (actionValue.value.length === 0) {
+                    isAllowed.value = false
+                    return
+                }
+
+                const permissionPromises = actionValue.value.map(act => permissionsService.can(act))
+                const results = await Promise.all(permissionPromises)
+                isAllowed.value = results.some(result => result === true)
+            } else {
+                isAllowed.value = await permissionsService.can(actionValue.value)
+            }
         } catch (err) {
             error.value = err instanceof Error ? err : new Error(String(err))
             isAllowed.value = false
@@ -37,7 +51,7 @@ export function usePermissions(action: string | Ref<string>, options: UsePermiss
     }
 
     // Re-check when action changes
-    if (typeof action !== 'string') {
+    if (typeof action === 'object' && 'value' in action) {
         const unwatch = watch(action, () => {
             checkPermission()
         })

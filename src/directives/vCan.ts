@@ -3,7 +3,7 @@ import { PermissionsService } from '../services/permissionsService'
 
 interface CanHTMLElement extends HTMLElement {
     _permission_data?: {
-        action: string
+        action: string | string[]
         originalDisplay: string
         permissionChecked?: boolean
     }
@@ -44,8 +44,25 @@ async function checkPermission(action: string): Promise<boolean> {
     return permissionsCache.get(action) as Promise<boolean>;
 }
 
+// Функция для проверки массива разрешений
+async function checkPermissions(actions: string | string[]): Promise<boolean> {
+    if (typeof actions === 'string') {
+        return checkPermission(actions);
+    }
+
+    // Если передан пустой массив, считаем что прав нет
+    if (actions.length === 0) {
+        return false;
+    }
+
+    // Проверяем все разрешения и возвращаем true, если хотя бы одно из них доступно
+    const permissionPromises = actions.map(action => checkPermission(action));
+    const results = await Promise.all(permissionPromises);
+    return results.some(result => result === true);
+}
+
 // Общая логика для обработки элементов, применяемая обеими директивами
-async function processElement(el: CanHTMLElement, action: string, showWhenAllowed: boolean) {
+async function processElement(el: CanHTMLElement, action: string | string[], showWhenAllowed: boolean) {
     const originalDisplay = el.style.display;
 
     // Store action and original display for updates
@@ -59,7 +76,7 @@ async function processElement(el: CanHTMLElement, action: string, showWhenAllowe
     el.style.display = 'none';
 
     try {
-        const hasPermission = await checkPermission(action);
+        const hasPermission = await checkPermissions(action);
 
         // Показываем элемент в зависимости от режима и результата проверки
         if ((showWhenAllowed && hasPermission) || (!showWhenAllowed && !hasPermission)) {
@@ -82,7 +99,15 @@ export const vCan: ObjectDirective = {
     },
 
     async updated(el: CanHTMLElement, binding: DirectiveBinding) {
-        if (!el._permission_data || el._permission_data.action !== binding.value) {
+        // Проверяем изменение значения, учитывая возможность массива
+        const actionChanged = !el._permission_data ||
+            (typeof el._permission_data.action !== typeof binding.value) ||
+            (typeof binding.value === 'string' && el._permission_data.action !== binding.value) ||
+            (Array.isArray(binding.value) &&
+                (!Array.isArray(el._permission_data.action) ||
+                    JSON.stringify(el._permission_data.action) !== JSON.stringify(binding.value)));
+
+        if (actionChanged) {
             await processElement(el, binding.value, true);
         }
     },
@@ -102,7 +127,15 @@ export const vCant: ObjectDirective = {
     },
 
     async updated(el: CanHTMLElement, binding: DirectiveBinding) {
-        if (!el._permission_data || el._permission_data.action !== binding.value) {
+        // Проверяем изменение значения, учитывая возможность массива
+        const actionChanged = !el._permission_data ||
+            (typeof el._permission_data.action !== typeof binding.value) ||
+            (typeof binding.value === 'string' && el._permission_data.action !== binding.value) ||
+            (Array.isArray(binding.value) &&
+                (!Array.isArray(el._permission_data.action) ||
+                    JSON.stringify(el._permission_data.action) !== JSON.stringify(binding.value)));
+
+        if (actionChanged) {
             await processElement(el, binding.value, false);
         }
     },
