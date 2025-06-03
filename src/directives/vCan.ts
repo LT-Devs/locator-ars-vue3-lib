@@ -46,6 +46,11 @@ async function checkPermission(action: string): Promise<boolean> {
 
 // Функция для проверки массива разрешений
 async function checkPermissions(actions: string | string[]): Promise<boolean> {
+    if (!globalPermissionsService) {
+        console.warn('Permissions service not initialized yet.');
+        return false;
+    }
+
     if (typeof actions === 'string') {
         return checkPermission(actions);
     }
@@ -55,10 +60,21 @@ async function checkPermissions(actions: string | string[]): Promise<boolean> {
         return false;
     }
 
-    // Проверяем все разрешения и возвращаем true, если хотя бы одно из них доступно
-    const permissionPromises = actions.map(action => checkPermission(action));
-    const results = await Promise.all(permissionPromises);
-    return results.some(result => result === true);
+    // Используем кэш для массива, чтобы избежать повторных запросов
+    const cacheKey = JSON.stringify(actions);
+    if (!permissionsCache.has(cacheKey)) {
+        // Отправляем один запрос с массивом разрешений
+        const permissionPromise = globalPermissionsService.can(actions)
+            .catch(error => {
+                console.error('Error checking permissions:', error);
+                permissionsCache.delete(cacheKey);
+                return false;
+            });
+
+        permissionsCache.set(cacheKey, permissionPromise);
+    }
+
+    return permissionsCache.get(cacheKey) as Promise<boolean>;
 }
 
 // Общая логика для обработки элементов, применяемая обеими директивами

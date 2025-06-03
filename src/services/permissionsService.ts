@@ -8,7 +8,7 @@ export interface PermissionsOptions {
 
 export class PermissionsService {
     private axios: AxiosInstance
-    private cache: Map<string, boolean> = new Map()
+    private cache: Map<string, boolean | string> = new Map()
     private endpoint: string
     private application?: string
 
@@ -25,34 +25,41 @@ export class PermissionsService {
         }
     }
 
-    async can(action: string): Promise<boolean> {
+    async can(action: string | string[]): Promise<boolean> {
+        // Преобразуем массив в строку вида ['value1','value2','value3']
+        const actionKey = Array.isArray(action) ? JSON.stringify(action) : action;
+
         // Check if we have a cached result
-        if (this.cache.has(action)) {
-            return this.cache.get(action) as boolean
+        if (this.cache.has(actionKey)) {
+            return this.cache.get(actionKey) as boolean;
         }
 
         try {
-            const response = await this.axios.get(this.endpoint, {
-                params: { action }
-            })
+            let params: { action: string | string[] } = { action };
 
-            const allowed = response.data.allowed || false
+            // Если это массив, преобразуем его в строку вида ['value1','value2','value3']
+            if (Array.isArray(action)) {
+                params = { action: JSON.stringify(action) };
+            }
+
+            const response = await this.axios.get(this.endpoint, { params });
+            const allowed = response.data.allowed || false;
 
             // Cache the result
-            this.cache.set(action, allowed)
+            this.cache.set(actionKey, allowed);
 
-            return allowed
+            return allowed;
         } catch (error) {
-            console.error(`Error checking permission for ${action}:`, error)
-            return false
+            console.error(`Error checking permission for ${Array.isArray(action) ? JSON.stringify(action) : action}:`, error);
+            return false;
         }
     }
 
     clearCache(action?: string): void {
         if (action) {
-            this.cache.delete(action)
+            this.cache.delete(action);
         } else {
-            this.cache.clear()
+            this.cache.clear();
         }
     }
 } 

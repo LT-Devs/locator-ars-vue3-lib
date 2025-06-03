@@ -24,19 +24,8 @@ export function usePermissions(action: ActionType, options: UsePermissionsOption
         error.value = null
 
         try {
-            if (Array.isArray(actionValue.value)) {
-                // Для массива проверяем все разрешения и возвращаем true, если хотя бы одно доступно
-                if (actionValue.value.length === 0) {
-                    isAllowed.value = false
-                    return
-                }
-
-                const permissionPromises = actionValue.value.map(act => permissionsService.can(act))
-                const results = await Promise.all(permissionPromises)
-                isAllowed.value = results.some(result => result === true)
-            } else {
-                isAllowed.value = await permissionsService.can(actionValue.value)
-            }
+            // Передаем разрешения напрямую в метод can, который теперь поддерживает массивы
+            isAllowed.value = await permissionsService.can(actionValue.value)
         } catch (err) {
             error.value = err instanceof Error ? err : new Error(String(err))
             isAllowed.value = false

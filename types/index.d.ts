@@ -20,7 +20,7 @@ export interface UsePermissionsResult {
 
 export class PermissionsService {
     constructor(options?: PermissionsOptions)
-    can(action: string): Promise<boolean>
+    can(action: string | string[]): Promise<boolean>
     clearCache(action?: string): void
 }
 
